@@ -1,0 +1,5 @@
+day1_lambda_basics.cpp: In lambda function:
+day1_lambda_basics.cpp:203:16: warning: implicit capture of 'this' via '[=]' is deprecated in C++20 [-Wdeprecated]
+  203 |         return [=] { return v; };          // ← 实际捕获 this（sizeof == 8）
+      |                ^
+day1_lambda_basics.cpp:203:16: note: add explicit 'this' or '*this' capture

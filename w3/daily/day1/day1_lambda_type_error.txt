@@ -1,0 +1,4 @@
+day1_lambda_type_error.cpp: In lambda function:
+day1_lambda_type_error.cpp:16:16: error: inconsistent types 'int' and 'double' deduced for lambda return type
+   16 |         return 2.0;              // double  ← 冲突
+      |                ^~~

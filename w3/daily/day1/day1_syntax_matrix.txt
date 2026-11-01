@@ -1,0 +1,36 @@
+lambda 语法可行性矩阵（g++ 16.1.0 / -std=c++20 / -fsyntax-only）
+====================================================================================================
+ 1. OK    mutable 紧跟参数列表                   
+ 2. ERROR mutable 放在 -> 之后（错序）             expected '{' before 'mutable'
+ 3. OK    noexcept 与 mutable（mutable 先）    
+ 4. ERROR noexcept 与 mutable（noexcept 先）   expected '{' before 'mutable'
+ 5. OK    constexpr 修饰                     
+ 6. OK    mutable + constexpr              
+ 7. OK    省略参数列表 ()                        
+ 8. OK    模板 lambda（C++20）                 
+ 9. OK    泛型 lambda（C++14）                 
+10. OK    init capture（C++14）              
+11. OK    移动捕获 [p = std::move(q)]          
+12. OK    [=, &b]（默认值捕获 + 显式引用）            
+13. OK    [=, a]（与默认值捕获重复）                 [警告] explicit by-copy capture of 'a' redundant with by-copy capture default
+14. OK    [&, &a]（与默认引用捕获重复）               [警告] explicit by-reference capture of 'a' redundant with by-reference capture default
+15. OK    [a, a]（同一变量捕获两次）                 [警告] already captured 'a' in lambda expression
+16. OK    [&, a]（默认引用 + 显式值捕获）             
+17. OK    [*this] 拷贝整个对象（C++17）            
+18. OK    [=] 隐式捕获 this（C++20 弃用）          [警告] implicit capture of 'this' via '[=]' is deprecated in C++20 [-Wdeprecated]
+19. OK    无捕获转函数指针                         
+20. ERROR 有捕获转函数指针（应失败）                    cannot convert 'main()::<lambda()>' to 'void (*)()' in initialization
+21. ERROR lambda 直接递归（应失败）                 use of 'fib' before deduction of 'auto'
+22. OK    IIFE 立即调用                        
+23. ERROR 值捕获后修改，无 mutable（应失败）            assignment of read-only variable 'a'
+24. OK    值捕获后修改，加 mutable                 
+25. OK    引用捕获后修改，无需 mutable               
+26. OK    constexpr 与 mutable（constexpr 先） 
+====================================================================================================
+结论 1（位置）：mutable / constexpr 属于「参数列表之后的修饰符序列」，可互换顺序；
+        noexcept 必须排在 mutable 之后、-> T 之前；返回类型只能在最后。
+结论 2（捕获合法性）：[=, &x] 和 [&, x] 合法；[=, x] / [&, &x] / [x, x] 按标准是 ill-formed，
+        但 GCC 16 只给 -Wall 级警告（换 Clang/MSVC 可能直接报错）→ 实际编码一律避免。
+结论 3（值捕获是 const）：无 mutable 时值捕获不可修改（ERROR）；加 mutable 或改引用捕获才行。
+结论 4（函数指针）：无捕获才有到函数指针的隐式转换；有捕获直接 ERROR。
+结论 5（递归）：lambda 不能直接递归（闭包类型在 auto 推导完成前不可用）——用 std::function 或 Y 组合子。

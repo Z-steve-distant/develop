@@ -1,0 +1,149 @@
+W3 验收 A 档第 3 条 · ASan 原始报错留证
+生成时间: 2026-10-18 21:27:44
+环境: g++ (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+编译命令: g++ -std=c++20 -O0 -g -fsanitize=address,undefined -fno-omit-frame-pointer cmake_project/examples/ex_asan_bug.cpp
+
+===================== [1] 数组越界写：ex_asan_bug oob =====================
+$ ASAN_OPTIONS=detect_leaks=1 ./_build_artifacts/ex_asan_bug oob
+
+cmake_project/examples/ex_asan_bug.cpp:15:8: runtime error: index 5 out of bounds for type 'int [3]'
+cmake_project/examples/ex_asan_bug.cpp:15:10: runtime error: store to address 0x6dc6e34f0034 with insufficient space for an object of type 'int'
+0x6dc6e34f0034: note: pointer points here
+  00 00 00 00 00 00 00 00  00 80 4e e3 c6 6d 00 00  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00
+              ^ 
+=================================================================
+==5648==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x6dc6e34f0034 at pc 0x5e3cb9634531 bp 0x7ffce34529c0 sp 0x7ffce34529b0
+WRITE of size 4 at 0x6dc6e34f0034 thread T0
+    #0 0x5e3cb9634530 in outOfBounds cmake_project/examples/ex_asan_bug.cpp:15
+    #1 0x5e3cb9634895 in main cmake_project/examples/ex_asan_bug.cpp:35
+    #2 0x71c6e562a600 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:59
+    #3 0x71c6e562a717 in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x5e3cb96342a4 in _start (/home/king/develop/w3/_build_artifacts/ex_asan_bug+0x22a4) (BuildId: 514e46294e56e9e7657fe8ef8777e94c7a8e8c3d)
+
+Address 0x6dc6e34f0034 is located in stack of thread T0 at offset 52 in frame
+    #0 0x5e3cb9634378 in outOfBounds cmake_project/examples/ex_asan_bug.cpp:13
+
+  This frame has 1 object(s):
+    [32, 44) 'a' (line 14) <== Memory access at offset 52 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow cmake_project/examples/ex_asan_bug.cpp:15 in outOfBounds
+Shadow bytes around the buggy address:
+  0x6dc6e34efd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x6dc6e34efe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x6dc6e34efe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x6dc6e34eff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x6dc6e34eff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x6dc6e34f0000: f1 f1 f1 f1 00 04[f3]f3 00 00 00 00 00 00 00 00
+  0x6dc6e34f0080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x6dc6e34f0100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x6dc6e34f0180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x6dc6e34f0200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x6dc6e34f0280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==5648==ABORTING
+
+(exit code: 0)
+
+===================== [2] use-after-free：ex_asan_bug uaf =====================
+$ ASAN_OPTIONS=detect_leaks=1 ./_build_artifacts/ex_asan_bug uaf
+
+=================================================================
+==5649==ERROR: AddressSanitizer: heap-use-after-free on address 0x798e97de0010 at pc 0x5dde98a5f702 bp 0x7ffddae0c190 sp 0x7ffddae0c180
+READ of size 4 at 0x798e97de0010 thread T0
+    #0 0x5dde98a5f701 in useAfterFree cmake_project/examples/ex_asan_bug.cpp:22
+    #1 0x5dde98a5f8cf in main cmake_project/examples/ex_asan_bug.cpp:37
+    #2 0x7d6e98a2a600 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:59
+    #3 0x7d6e98a2a717 in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x5dde98a5f2a4 in _start (/home/king/develop/w3/_build_artifacts/ex_asan_bug+0x22a4) (BuildId: 514e46294e56e9e7657fe8ef8777e94c7a8e8c3d)
+
+0x798e97de0010 is located 0 bytes inside of 4-byte region [0x798e97de0010,0x798e97de0014)
+freed by thread T0 here:
+    #0 0x7d6e99b2d89f in operator delete(void*, unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:190
+    #1 0x5dde98a5f6a2 in useAfterFree cmake_project/examples/ex_asan_bug.cpp:21
+    #2 0x5dde98a5f8cf in main cmake_project/examples/ex_asan_bug.cpp:37
+    #3 0x7d6e98a2a600 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:59
+    #4 0x7d6e98a2a717 in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5dde98a5f2a4 in _start (/home/king/develop/w3/_build_artifacts/ex_asan_bug+0x22a4) (BuildId: 514e46294e56e9e7657fe8ef8777e94c7a8e8c3d)
+
+previously allocated by thread T0 here:
+    #0 0x7d6e99b2c73f in operator new(unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:109
+    #1 0x5dde98a5f60e in useAfterFree cmake_project/examples/ex_asan_bug.cpp:20
+    #2 0x5dde98a5f8cf in main cmake_project/examples/ex_asan_bug.cpp:37
+    #3 0x7d6e98a2a600 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:59
+    #4 0x7d6e98a2a717 in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5dde98a5f2a4 in _start (/home/king/develop/w3/_build_artifacts/ex_asan_bug+0x22a4) (BuildId: 514e46294e56e9e7657fe8ef8777e94c7a8e8c3d)
+
+SUMMARY: AddressSanitizer: heap-use-after-free cmake_project/examples/ex_asan_bug.cpp:22 in useAfterFree
+Shadow bytes around the buggy address:
+  0x798e97ddfd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x798e97ddfe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x798e97ddfe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x798e97ddff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x798e97ddff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x798e97de0000: fa fa[fd]fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x798e97de0080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x798e97de0100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x798e97de0180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x798e97de0200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x798e97de0280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==5649==ABORTING
+
+(exit code: 0)
+
+===================== [3] 内存泄漏：ex_asan_bug leak =====================
+$ ASAN_OPTIONS=detect_leaks=1 ./_build_artifacts/ex_asan_bug leak
+
+
+=================================================================
+==5650==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 4 byte(s) in 1 object(s) allocated from:
+    #0 0x7a4a13b2c73f in operator new(unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:109
+    #1 0x60f825f7f73b in leak cmake_project/examples/ex_asan_bug.cpp:26
+    #2 0x60f825f7f909 in main cmake_project/examples/ex_asan_bug.cpp:39
+    #3 0x7a4a12a2a600 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:59
+    #4 0x7a4a12a2a717 in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x60f825f7f2a4 in _start (/home/king/develop/w3/_build_artifacts/ex_asan_bug+0x22a4) (BuildId: 514e46294e56e9e7657fe8ef8777e94c7a8e8c3d)
+
+SUMMARY: AddressSanitizer: 4 byte(s) leaked in 1 allocation(s).
+
+(exit code: 0)
+

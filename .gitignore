@@ -1,0 +1,30 @@
+# 构建产物
+build/
+_build_artifacts/
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.exe
+*.out
+a.out
+
+# 可执行文件（无扩展名）
+w4/day1/1
+w4/d6/test1
+w5/d1/1
+w5/d2/1
+
+# 临时文件与密钥
+.env
+*.env
+*.key
+*.pem
+*.tmp
+.DS_Store
+*.swp
+
+# CMake 缓存
+CMakeCache.txt
+CMakeFiles/
