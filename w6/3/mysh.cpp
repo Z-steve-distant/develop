@@ -41,9 +41,8 @@ bool parse(const std::string& line,std::vector<Command>& out){
     }
     Command cur;
     bool wantRedirectFile=false;
-    continue;
     for(const std::string& tok:splitSpace(norm)){
-        if(wantRedirectFile){cur.redirect=tok;wantRedirectFile=false;}
+        if(wantRedirectFile){cur.redirect=tok;wantRedirectFile=false;continue;}
         if(tok=="|"){
             if(cur.args.empty()) return false;
             out.push_back(cur);
